@@ -92,8 +92,10 @@
 </section>
   <section class="page" id="page-media">
   <div class="section-head"><div><h3>Media Manager</h3><p>ছবি ও ভিডিও Dashboard থেকেই Upload, Move ও Delete করুন</p></div><div class="toolbar"><button class="btn" id="loadMedia">↻ Refresh</button><button class="btn primary" id="uploadMediaBtn">↑ Upload Media</button><input id="mediaFileInput" type="file" accept="image/*,video/*" multiple hidden></div></div>
-  <div class="notice warn">Upload সীমা আপাতত প্রতি ফাইলে 8 MB। Delete করলে ফাইল Google Drive Trash-এ যাবে। Move করলে Drive Folder এবং Media Library দুটোই আপডেট হবে।</div>
-  <div class="card"><div class="table-wrap"><table class="data-table"><thead><tr><th>PREVIEW / FILE</th><th>PRODUCT</th><th>TYPE</th><th>STATUS</th><th>OPEN</th><th>ACTIONS</th></tr></thead><tbody id="mediaBody"><tr><td colspan="6" class="empty">Connect backend to load media.</td></tr></tbody></table></div></div>
+  <div class="notice warn">প্রতি ফাইল সর্বোচ্চ 8 MB। Upload-এর আগে Product Folder Dropdown থেকে নির্বাচন করুন। Upload শেষ হলে Drive scan করে Media Library আপডেট হবে।</div>
+  <div class="card" id="mediaUploadPanel" style="display:none;margin-bottom:14px"><div class="section-head" style="margin:0 0 10px"><div><h3>Upload Queue</h3><p id="uploadSummary">ফাইল প্রস্তুত হচ্ছে…</p></div><button class="btn" id="clearUploadQueue">Clear</button></div><div id="uploadQueue"></div></div>
+  <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0"><div class="card"><div class="metric-head">Total Media</div><div class="metric-value" id="mediaTotal">0</div></div><div class="card"><div class="metric-head">Images</div><div class="metric-value" id="mediaImages">0</div></div><div class="card"><div class="metric-head">Videos</div><div class="metric-value" id="mediaVideos">0</div></div></div>
+  <div class="card"><div class="toolbar"><select class="field" id="mediaProductFilter"><option value="">All Product Folders</option></select><select class="field" id="mediaTypeFilter"><option value="">All Media Types</option><option>Image</option><option>Video</option></select></div><div class="table-wrap"><table class="data-table"><thead><tr><th>PREVIEW / FILE</th><th>PRODUCT / FOLDER</th><th>TYPE / SIZE</th><th>UPLOAD DATE / STATUS</th><th>OPEN</th><th>ACTIONS</th></tr></thead><tbody id="mediaBody"><tr><td colspan="6" class="empty">Connect backend to load media.</td></tr></tbody></table></div></div>
 </section>
   <section class="page" id="page-content">
     <div class="section-head">
@@ -318,14 +320,18 @@ $("createProductBtn").onclick=async()=>{
  toast("Product তৈরি হয়েছে: "+d.productId);loadProducts();
  }catch(e){toast(e.message)}
 };
-async function loadMedia(){try{const d=await api("media");$("mMedia").textContent=d.media.length;$("mediaBody").innerHTML=d.media.map(m=>`<tr>
-<td>${safe(m.name)}</td><td>${safe(m.productId)}</td><td>${safe(m.type)}</td>
-<td><span class="pill ${m.status==="Available"?"good":"warn"}">${safe(m.status)}</span></td>
-<td><a href="${safe(m.url)}" target="_blank" rel="noopener">Open ↗</a></td>
-<td><div class="toolbar"><button class="btn moveMedia" data-id="${safe(m.id)}">Move</button><button class="btn danger trashMedia" data-id="${safe(m.id)}" data-product="${safe(m.productId)}">Delete</button></div></td></tr>`).join("")||'<tr><td colspan="6" class="empty">No media indexed yet</td></tr>';
-document.querySelectorAll(".moveMedia").forEach(b=>b.onclick=()=>moveMedia(b.dataset.id));
-document.querySelectorAll(".trashMedia").forEach(b=>b.onclick=()=>trashMedia(b.dataset.id,b.dataset.product));
-}catch(e){toast(e.message)}}
+let mediaCache=[];
+function fmtBytes(n){n=Number(n||0);if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(2)+' MB'}
+function renderMedia(){
+ const pid=$("mediaProductFilter").value, typ=$("mediaTypeFilter").value;
+ const rows=mediaCache.filter(m=>(!pid||m.productId===pid)&&(!typ||m.type===typ));
+ $("mediaTotal").textContent=mediaCache.length;$("mediaImages").textContent=mediaCache.filter(m=>m.type==="Image").length;$("mediaVideos").textContent=mediaCache.filter(m=>m.type==="Video").length;
+ $("mediaBody").innerHTML=rows.map(m=>{const thumb=m.type==="Image"&&m.id?`<img src="https://drive.google.com/thumbnail?id=${encodeURIComponent(m.id)}&sz=w160" style="width:68px;height:52px;object-fit:cover;border-radius:8px" loading="lazy" onerror="this.style.display='none'">`: '<div style="width:68px;height:52px;border-radius:8px;background:var(--panel2);display:grid;place-items:center;font-size:22px">▶</div>';return `<tr><td><div style="display:flex;gap:9px;align-items:center">${thumb}<div><strong>${safe(m.name)}</strong><br><span class="small-muted">${safe(m.mimeType||'Media file')}</span></div></div></td><td>${safe(m.productName||m.productId)}<br><span class="small-muted">${safe(m.productId)}</span></td><td>${safe(m.type)}<br><span class="small-muted">${fmtBytes(m.size)}</span></td><td>${safe(m.created||'—')}<br><span class="pill ${m.status==='Available'?'good':'warn'}">${safe(m.status)}</span></td><td><a href="${safe(m.url)}" target="_blank" rel="noopener">Open ↗</a></td><td><div class="toolbar"><button class="btn moveMedia" data-id="${safe(m.id)}">Move</button><button class="btn danger trashMedia" data-id="${safe(m.id)}" data-product="${safe(m.productId)}">Delete</button></div></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">এই Filter-এ কোনো Media পাওয়া যায়নি</td></tr>';
+ document.querySelectorAll('.moveMedia').forEach(b=>b.onclick=()=>moveMedia(b.dataset.id));document.querySelectorAll('.trashMedia').forEach(b=>b.onclick=()=>trashMedia(b.dataset.id,b.dataset.product));
+}
+async function loadMedia(){try{const [d,p]=await Promise.all([api('media'),api('products')]);mediaCache=d.media||[];const active=p.products.filter(x=>x.active);const opts='<option value="">All Product Folders</option>'+active.map(x=>`<option value="${safe(x.id)}">${safe(x.name)} (${safe(x.id)})</option>`).join('');$('mediaProductFilter').innerHTML=opts;$('mediaProductFilter').onchange=renderMedia;$('mediaTypeFilter').onchange=renderMedia;renderMedia();}catch(e){toast('Media Load: '+e.message)}}
+function addUploadRow(file,product){const row=document.createElement('div');row.className='notice';row.style.margin='8px 0';row.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px"><strong>${safe(file.name)}</strong><span class="pill warn">Queued</span></div><div class="small-muted">${safe(product.name)} · ${file.type.startsWith('video/')?'Video':'Image'} · ${fmtBytes(file.size)}</div><div style="height:7px;background:var(--line);border-radius:8px;margin:9px 0;overflow:hidden"><div class="progress" style="height:100%;width:0;background:var(--accent2);transition:width .2s"></div></div><div class="small-muted status">Waiting…</div>`;$('uploadQueue').appendChild(row);return row}
+$('mediaProductFilter').onchange=renderMedia;$('mediaTypeFilter').onchange=renderMedia;$('clearUploadQueue').onclick=()=>{$('uploadQueue').innerHTML='';$('mediaUploadPanel').style.display='none'};
 async function moveMedia(fileId){
  try{const d=await api("products");const choices=d.products.filter(p=>p.active).map(p=>p.id+" — "+p.name).join("\\n");
  const target=prompt("Destination Product ID লিখুন:\\n"+choices);if(!target)return;
@@ -340,17 +346,28 @@ $("uploadMediaBtn").onclick=async()=>{try{await ensureAdmin();$("mediaFileInput"
 $("mediaFileInput").onchange=async e=>{
  const files=Array.from(e.target.files||[]);if(!files.length)return;
  try{
- const d=await api("products");const choices=d.products.filter(p=>p.active).map(p=>p.id+" — "+p.name).join("\\n");
- const productId=prompt("কোন Product Folder-এ Upload করবেন? Product ID লিখুন:\\n"+choices);if(!productId)return;
- for(const file of files){
-  if(file.size>8*1024*1024)throw new Error(file.name+" 8 MB-এর বেশি। আপাতত ছোট ফাইল দিন।");
-  if(!/^(image\/|video\/)/.test(file.type))throw new Error("শুধু Image/Video: "+file.name);
-  const base64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(",")[1]);r.onerror=reject;r.readAsDataURL(file)});
-  const token=await ensureAdmin();
-  await fetch(backendUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify({action:"uploadFile",token,productId:productId.split("—")[0].trim(),fileName:file.name,mimeType:file.type,base64})});
- }
- toast("Upload request পাঠানো হয়েছে। Drive/Media Library Refresh করুন।");setTimeout(loadMedia,5000);
- }catch(err){toast("Upload সমস্যা: "+err.message)}finally{e.target.value=""}
+  const d=await api('products'), active=d.products.filter(p=>p.active);
+  const picker=document.createElement('select');picker.className='field';picker.style.width='100%';picker.innerHTML='<option value="">Select destination Product Folder</option>'+active.map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — ${safe(p.id)}</option>`).join('');
+  const wrap=document.createElement('div');wrap.style.cssText='position:fixed;inset:0;background:#020617cc;z-index:10000;display:grid;place-items:center;padding:18px';wrap.innerHTML='<div class="card" style="width:min(440px,100%)"><h3>Select Upload Folder</h3><p class="small-muted">সব নির্বাচিত ফাইল এই Product-এর Drive Folder-এ যাবে।</p></div>';
+  const card=wrap.firstElementChild;card.appendChild(picker);const actions=document.createElement('div');actions.className='toolbar';actions.style.justifyContent='flex-end';actions.innerHTML='<button class="btn" type="button">Cancel</button><button class="btn primary" type="button">Start Upload</button>';card.appendChild(actions);document.body.appendChild(wrap);
+  const chosen=await new Promise(resolve=>{actions.children[0].onclick=()=>{wrap.remove();resolve(null)};actions.children[1].onclick=()=>{const x=active.find(p=>p.id===picker.value);if(!x){toast('একটি Product Folder নির্বাচন করুন');return}wrap.remove();resolve(x)}});if(!chosen)return;
+  $('mediaUploadPanel').style.display='block';$('uploadQueue').innerHTML='';let done=0;
+  for(const file of files){
+   const row=addUploadRow(file,chosen),bar=row.querySelector('.progress'),status=row.querySelector('.status'),pill=row.querySelector('.pill');
+   if(file.size>8*1024*1024){pill.textContent='Rejected';pill.className='pill warn';status.textContent='৮ MB সীমা অতিক্রম করেছে';continue}
+   if(!/^(image\/|video\/)/.test(file.type)){pill.textContent='Rejected';status.textContent='শুধু Image/Video অনুমোদিত';continue}
+   try{
+    status.textContent='Reading file…';const base64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onprogress=ev=>{if(ev.lengthComputable){bar.style.width=Math.round(ev.loaded/ev.total*35)+'%';status.textContent='Preparing file '+Math.round(ev.loaded/ev.total*100)+'%'}};r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=()=>reject(new Error('File read failed'));r.readAsDataURL(file)});
+    bar.style.width='45%';status.textContent='Sending to Google Drive…';pill.textContent='Sending';
+    const token=await ensureAdmin();await fetch(backendUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action:'uploadFile',token,productId:chosen.id,fileName:file.name,mimeType:file.type,base64})});
+    // no-cors does not expose the server response; confirm by polling the indexed Media Library.
+    let found=false;for(let n=0;n<12;n++){await new Promise(r=>setTimeout(r,2500));try{const md=await api('media');found=(md.media||[]).some(m=>m.productId===chosen.id&&m.name===file.name);if(found)break}catch(_){}}
+    if(found){bar.style.width='100%';pill.textContent='Completed';pill.className='pill good';status.textContent='Drive-এ পাওয়া গেছে · Upload complete';done++}
+    else{bar.style.width='100%';pill.textContent='Submitted';status.textContent='Request পাঠানো হয়েছে, কিন্তু Media Library-তে নিশ্চিত হওয়া যায়নি। Refresh/Scan করুন।'}
+   }catch(err){pill.textContent='Failed';pill.className='pill warn';status.textContent=err.message}
+  }
+  $('uploadSummary').textContent=`${done} / ${files.length} ফাইল Drive-এ নিশ্চিত হয়েছে`;await loadMedia();
+ }catch(err){toast('Upload সমস্যা: '+err.message)}finally{e.target.value=''}
 };
 async function loadLogs(){try{const d=await api("logs");const rows=d.logs;$("logsBody").innerHTML=rows.map(l=>`<tr><td>${safe(l.time)}</td><td>${safe(l.workflow)}</td><td>${safe(l.productId)}</td><td>${safe(l.action)}</td><td>${safe(l.status)}</td><td>${safe(l.details)}</td></tr>`).join("")||'<tr><td colspan="6" class="empty">No logs</td></tr>';$("recentLogs").innerHTML=rows.slice(0,5).map(l=>`<tr><td>${safe(l.time)}</td><td>${safe(l.workflow)}</td><td>${safe(l.action)}</td><td>${safe(l.status)}</td></tr>`).join("")||'<tr><td colspan="4" class="empty">No activity yet</td></tr>'}catch(e){toast(e.message)}}
 
