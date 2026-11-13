@@ -240,15 +240,16 @@ function api(action, extraParams = {}) {
 }
 $("testBackend").onclick=async()=>{try{const d=await api("ping");$("backendState").textContent="Connected · "+(d.message||"OK");$("stSheets").textContent="Connected";$("stSheets").className="pill good";$("dotSheets").style.background="var(--accent2)";toast("Backend connection successful")}catch(e){$("backendState").textContent="Connection failed: "+e.message;toast("সংযোগ হয়নি: "+e.message)}};
 function safe(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-async 
 let adminToken = sessionStorage.getItem("txAdminSession") || "";
 function openAdminLogin(){
-  if(adminToken){toast("Admin ইতোমধ্যে Login করা আছে");return;}
-  $("adminLoginError").textContent=""; $("adminPinInput").value="";
+  // Always show PIN form, even if an old cached token has expired.
+  $("adminLoginError").textContent="";
+  $("adminPinInput").value="";
   $("adminLoginModal").classList.add("show");
-  setTimeout(()=>$("adminPinInput").focus(),50);
+  $("adminLoginModal").style.display="flex";
+  setTimeout(()=>$("adminPinInput").focus(),80);
 }
-function closeAdminLogin(){$("adminLoginModal").classList.remove("show");}
+function closeAdminLogin(){$("adminLoginModal").classList.remove("show");$("adminLoginModal").style.display="none";}
 $("adminLoginCancel").onclick=closeAdminLogin;
 $("adminLoginModal").addEventListener("click",e=>{if(e.target===$("adminLoginModal"))closeAdminLogin();});
 $("adminLoginForm").addEventListener("submit",async e=>{
@@ -267,8 +268,8 @@ async function ensureAdmin() {
 async function adminAction(action, data={}) {
   const token=await ensureAdmin(); return api("admin",{op:action,token,...data});
 }
-$("adminLoginBtn").onclick=openAdminLogin;
-async function loadProducts(){try{const d=await api("products");fillContentProducts(d.products);$("mProducts").textContent=d.products.filter(p=>p.active).length;$("productsBody").innerHTML=d.products.map(p=>`<tr>
+$("adminLoginBtn").addEventListener("click", e=>{e.preventDefault();openAdminLogin();});
+async function loadProducts(){try{const d=await api("products");if(!Array.isArray(d.products))throw new Error("Products API থেকে product list পাওয়া যায়নি। Apps Script deployment version পরীক্ষা করুন।");fillContentProducts(d.products);$("mProducts").textContent=d.products.filter(p=>p.active).length;$("productsBody").innerHTML=d.products.map(p=>`<tr>
 <td><strong>${safe(p.name)}</strong><br><span class="small-muted">${safe(p.id)}</span></td>
 <td>${safe(p.category)}</td><td>৳${safe(p.minPrice)} – ৳${safe(p.maxPrice)}</td><td>${safe(p.stock)}</td>
 <td><span class="pill ${p.active?"good":"warn"}">${p.active?"Active":"Inactive"}</span></td>
@@ -277,7 +278,7 @@ async function loadProducts(){try{const d=await api("products");fillContentProdu
 document.querySelectorAll(".editProduct").forEach(b=>b.onclick=()=>editProduct(b.dataset.id));
 document.querySelectorAll(".renameFolder").forEach(b=>b.onclick=()=>renameProductFolder(b.dataset.id));
 document.querySelectorAll(".deactivateProduct").forEach(b=>b.onclick=()=>deactivateProduct(b.dataset.id));
-}catch(e){toast(e.message)}}
+}catch(e){$("productsBody").innerHTML='<tr><td colspan="7" class="empty" style="color:#fb7185;white-space:normal">Product Load Error: '+safe(e.message)+'</td></tr>';$("mProducts").textContent="Error";toast("Products load হয়নি: "+e.message)}}
 async function editProduct(id){
  try{const d=await api("products");const p=d.products.find(x=>x.id===id);if(!p)return;
  const name=prompt("Product Name",p.name);if(name===null)return;
