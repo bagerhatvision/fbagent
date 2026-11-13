@@ -1,0 +1,10 @@
+Apps Script project files:
+- Code.gs
+- Config.gs
+- Database.gs
+- DriveScanner.gs
+- Logger.gs
+- Main.gs
+- index.html (Apps Script HTML file; create as HTML file named index)
+- appsscript.json
+- README_BN.txt
