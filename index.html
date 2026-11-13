@@ -80,7 +80,7 @@
   </section>
 
   <section class="page" id="page-products"><div class="section-head"><div><h3>Product Catalog</h3><p>Google Sheets-এর Products tab থেকে পণ্যের তথ্য</p></div><button class="btn" id="loadProducts">↻ Load Products</button></div><div class="notice warn">পণ্যের নাম, মূল্যসীমা ও স্টক Google Sheets-এ নিয়ন্ত্রিত হবে। Dashboard থেকে তথ্য দেখানো হবে; এখানে এখনো Edit API সক্রিয় নয়।</div><div class="card"><div class="table-wrap"><table class="data-table"><thead><tr><th>PRODUCT</th><th>CATEGORY</th><th>PRICE RANGE</th><th>STOCK</th><th>STATUS</th></tr></thead><tbody id="productsBody"><tr><td colspan="5" class="empty">Connect backend to load products.</td></tr></tbody></table></div></div></section>
-  <section class="page" id="page-media"><div class="section-head"><div><h3>Media Library</h3><p>প্রতিটি পণ্যের Google Drive folder থেকে পাওয়া image ও video</p></div><button class="btn primary" id="scanMedia">↻ Scan Drive Media</button></div><div class="notice warn">Scan চালানোর জন্য Apps Script backend authorize ও deploy করতে হবে। ফাইল Drive-এ সরানো, rename বা delete করা হবে না।</div><div class="card"><div class="table-wrap"><table class="data-table"><thead><tr><th>FILE NAME</th><th>PRODUCT ID</th><th>TYPE</th><th>STATUS</th><th>OPEN</th></tr></thead><tbody id="mediaBody"><tr><td colspan="5" class="empty">Connect backend to load media.</td></tr></tbody></table></div></div></section>
+  <section class="page" id="page-media"><div class="section-head"><div><h3>Media Library</h3><p>প্রতিটি পণ্যের Google Drive folder থেকে পাওয়া image ও video</p></div><button class="btn primary" id="scanMedia">↻ Scan Drive Media</button></div><div class="notice warn">Drive Scan Google Sheet-এর Tech Express AI মেনু থেকে চালাতে হবে। GitHub Pages থেকে public write action চালু রাখা হয়নি। ফাইল Drive-এ সরানো, rename বা delete করা হবে না।</div><div class="card"><div class="table-wrap"><table class="data-table"><thead><tr><th>FILE NAME</th><th>PRODUCT ID</th><th>TYPE</th><th>STATUS</th><th>OPEN</th></tr></thead><tbody id="mediaBody"><tr><td colspan="5" class="empty">Connect backend to load media.</td></tr></tbody></table></div></div></section>
   <section class="page" id="page-content"><div class="section-head"><div><h3>AI Content Studio</h3><p>বাংলা ক্যাপশন, অফার, হ্যাশট্যাগ ও কনটেন্ট পরিকল্পনা</p></div><span class="pill warn">Not Activated</span></div><div class="card"><h3 style="margin-top:0">Content generation pipeline</h3><div class="notice">AI Engine এখনো সংযুক্ত নয়। Local AI (Ollama) অথবা অনুমোদিত Free-tier service configure না করা পর্যন্ত কোনো AI-generated content তৈরি হবে না।</div><div class="status-list"><div class="status-row">Product-aware Bangla captions <span class="pill">Planned</span></div><div class="status-row">Price range validation <span class="pill good">Required rule</span></div><div class="status-row">Verified feature filtering <span class="pill good">Required rule</span></div><div class="status-row">Caption / creative repetition guard <span class="pill">Planned</span></div></div></div></section>
   <section class="page" id="page-creative"><div class="section-head"><div><h3>Creative Studio</h3><p>Product image ad design workflow</p></div><span class="pill warn">Not Activated</span></div><div class="card"><div class="notice">পণ্যের আসল dial, strap, button ও branding অপরিবর্তিত রেখে image creative তৈরি করার workflow এখানে যুক্ত হবে। Image generation/editing engine এখনো configure করা হয়নি।</div></div></section>
   <section class="page" id="page-video"><div class="section-head"><div><h3>Video Studio</h3><p>Existing video edit, image slideshow ও export</p></div><span class="pill warn">Not Activated</span></div><div class="card"><div class="notice">আপনার Drive-এ থাকা ভিডিও ব্যবহার করা হবে। শুধু ছবি থাকলে FFmpeg দিয়ে slideshow তৈরি করা যাবে। AI দিয়ে শূন্য থেকে ভিডিও বানানো এই সিস্টেমের অংশ নয়।</div></div></section>
@@ -89,7 +89,7 @@
   <section class="page" id="page-published"><div class="section-head"><div><h3>Published Posts</h3><p>Facebook-এ প্রকাশিত পোস্টের ইতিহাস</p></div></div><div class="card"><div class="empty">Facebook Publishing এখনো সংযুক্ত নয়।</div></div></section>
   <section class="page" id="page-analytics"><div class="section-head"><div><h3>Analytics</h3><p>Reach, engagement, clicks ও publishing performance</p></div></div><div class="card"><div class="empty">Meta Insights API সংযুক্ত হলে Analytics এখানে দেখাবে।</div></div></section>
   <section class="page" id="page-connections"><div class="section-head"><div><h3>System Connections</h3><p>Backend endpoint ও service connection</p></div></div><div class="settings-grid">
-    <div class="card setting-card"><h3>Google Apps Script Backend</h3><p>এই Dashboard সরাসরি Google Apps Script Web App থেকেই চলবে। আলাদা API URL, Cloudflare বা অন্য Hosting Server প্রয়োজন নেই।</p><div class="status-row">Backend runtime <span class="pill good">Native Apps Script</span></div><div class="toolbar"><button class="btn primary" id="testBackend">Test Connection</button></div><span class="small-muted" id="backendState">Connection not tested yet</span></div>
+    <div class="card setting-card"><h3>Google Apps Script Backend</h3><p>Apps Script Web App URL এখানে দিন। এটি শুধু browser-এ সংরক্ষিত হবে; কোনো Secret Token এখানে রাখবেন না।</p><label>Web App URL</label><input id="backendUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"><div class="toolbar"><button class="btn" id="saveBackend">Save URL</button><button class="btn primary" id="testBackend">Test Connection</button></div><span class="small-muted" id="backendState">Backend URL not configured</span></div>
     <div class="card setting-card"><h3>Google Sheets & Drive</h3><p>আগে থেকেই নির্ধারিত spreadsheet এবং product Drive folders ব্যবহার হবে। Apps Script authorization প্রয়োজন।</p><div class="status-row">Spreadsheet <span class="pill warn">Pending Test</span></div><div class="status-row">Drive folders <span class="pill warn">Pending Scan</span></div></div>
     <div class="card setting-card"><h3>Facebook Page</h3><p>Meta Graph API permissions, Page ID ও token secure backend-এ configure করতে হবে। Token কখনো এই HTML-এ দেবেন না।</p><span class="pill warn">Not Connected</span></div>
     <div class="card setting-card"><h3>AI Engine</h3><p>Local Ollama / local image tooling অথবা verified free-tier connection configure করতে হবে। Unlimited cloud AI free ধরে নেওয়া যাবে না।</p><span class="pill warn">Not Configured</span></div>
@@ -111,13 +111,49 @@ function navigate(page){document.querySelectorAll(".page").forEach(p=>p.classLis
 document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.page)));
 document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.goto)));
 $("themeBtn").onclick=()=>{const light=document.documentElement.dataset.theme!=="light";document.documentElement.dataset.theme=light?"light":"dark";localStorage.setItem("tx_theme",light?"light":"dark");$("themeBtn").textContent=light?"☾":"☼"};
-function api(action){
-  const methods={ping:"dashboardApiPing",products:"dashboardApiProducts",media:"dashboardApiMedia",logs:"dashboardApiLogs",scan:"dashboardApiScan"};
-  const method=methods[action];
-  if(!method) return Promise.reject(new Error("Unknown action: "+action));
-  if(!window.google || !google.script || !google.script.run) return Promise.reject(new Error("Dashboard Apps Script context পাওয়া যায়নি। Apps Script Web App URL দিয়ে খুলুন।"));
-  return new Promise((resolve,reject)=>{
-    google.script.run.withSuccessHandler(resolve).withFailureHandler(err=>reject(new Error(err && err.message ? err.message : String(err))))[method]();
+const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbymdNu4wXCpx6J3n-Hhd8lzA_vlyrnI73TZ61tFWyEWi14kadP3TxlpK2zlipk5HIE/exec";
+let backendUrl = localStorage.getItem("tx_backend_url") || DEFAULT_BACKEND_URL;
+if ($("backendUrl")) $("backendUrl").value = backendUrl;
+$("saveBackend").onclick = () => {
+  const value = $("backendUrl").value.trim();
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec/.test(value)) {
+    toast("সঠিক Apps Script Web App URL দিন");
+    return;
+  }
+  backendUrl = value;
+  localStorage.setItem("tx_backend_url", backendUrl);
+  $("backendState").textContent = "URL saved in this browser";
+  toast("Backend URL সংরক্ষণ হয়েছে");
+};
+function api(action) {
+  if (!backendUrl) return Promise.reject(new Error("Connections পেজে আগে Apps Script Web App URL সংরক্ষণ করুন।"));
+  const allowed = ["ping", "products", "media", "logs"];
+  if (!allowed.includes(action)) return Promise.reject(new Error("এই API action অনুমোদিত নয়: " + action));
+  return new Promise((resolve, reject) => {
+    const callbackName = "txJsonp_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+    const script = document.createElement("script");
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error("Backend response timeout. Web App deployment ও access permission পরীক্ষা করুন।"));
+    }, 20000);
+    function cleanup() {
+      clearTimeout(timeout);
+      try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[callbackName] = data => {
+      cleanup();
+      if (!data || data.ok !== true) reject(new Error(data && data.error ? data.error : "Backend returned an error"));
+      else resolve(data);
+    };
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("Apps Script API load failed. Web App access বা URL পরীক্ষা করুন।"));
+    };
+    const separator = backendUrl.includes("?") ? "&" : "?";
+    script.src = backendUrl + separator + "action=" + encodeURIComponent(action) +
+      "&callback=" + encodeURIComponent(callbackName) + "&_=" + Date.now();
+    document.head.appendChild(script);
   });
 }
 $("testBackend").onclick=async()=>{try{const d=await api("ping");$("backendState").textContent="Connected · "+(d.message||"OK");$("stSheets").textContent="Connected";$("stSheets").className="pill good";$("dotSheets").style.background="var(--accent2)";toast("Backend connection successful")}catch(e){$("backendState").textContent="Connection failed: "+e.message;toast("সংযোগ হয়নি: "+e.message)}};
@@ -126,8 +162,21 @@ async function loadProducts(){try{const d=await api("products");$("mProducts").t
 async function loadMedia(){try{const d=await api("media");$("mMedia").textContent=d.media.length;$("mediaBody").innerHTML=d.media.map(m=>`<tr><td>${safe(m.name)}</td><td>${safe(m.productId)}</td><td>${safe(m.type)}</td><td><span class="pill ${m.status==="Available"?"good":"warn"}">${safe(m.status)}</span></td><td><a href="${safe(m.url)}" target="_blank" rel="noopener">Open ↗</a></td></tr>`).join("")||'<tr><td colspan="5" class="empty">No media indexed yet</td></tr>'}catch(e){toast(e.message)}}
 async function loadLogs(){try{const d=await api("logs");const rows=d.logs;$("logsBody").innerHTML=rows.map(l=>`<tr><td>${safe(l.time)}</td><td>${safe(l.workflow)}</td><td>${safe(l.productId)}</td><td>${safe(l.action)}</td><td>${safe(l.status)}</td><td>${safe(l.details)}</td></tr>`).join("")||'<tr><td colspan="6" class="empty">No logs</td></tr>';$("recentLogs").innerHTML=rows.slice(0,5).map(l=>`<tr><td>${safe(l.time)}</td><td>${safe(l.workflow)}</td><td>${safe(l.action)}</td><td>${safe(l.status)}</td></tr>`).join("")||'<tr><td colspan="4" class="empty">No activity yet</td></tr>'}catch(e){toast(e.message)}}
 $("loadProducts").onclick=loadProducts;$("loadLogs").onclick=loadLogs;
-$("scanMedia").onclick=async()=>{if(!confirm("Google Drive product folders scan করবেন? কোনো ফাইল পরিবর্তন হবে না।"))return;try{const d=await api("scan");$("stDrive").textContent="Scan complete";$("stDrive").className="pill good";$("dotDrive").style.background="var(--accent2)";toast(`Scan complete: ${d.mediaFound} media files`);loadMedia()}catch(e){toast("Scan failed: "+e.message)}};
+$("scanMedia").onclick=()=>{toast("নিরাপত্তার জন্য Drive Scan Google Sheet থেকে চালান: Tech Express AI → Drive Media Scan।");};
 $("refreshBtn").onclick=async()=>{try{await api("ping");await Promise.all([loadProducts(),loadMedia(),loadLogs()]);toast("Dashboard refreshed")}catch(e){toast("Backend সংযুক্ত নয়: "+e.message)}};
+// On first page load, verify the configured Apps Script backend and load read-only data.
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const d = await api("ping");
+    $("backendState").textContent = "Connected · " + (d.message || "OK");
+    $("stSheets").textContent = "Connected"; $("stSheets").className = "pill good";
+    $("dotSheets").style.background = "var(--accent2)";
+    if (d.productCount !== undefined) $("mProducts").textContent = d.activeProductCount ?? d.productCount;
+    await Promise.all([loadProducts(), loadMedia(), loadLogs()]);
+  } catch (e) {
+    $("backendState").textContent = "Connection failed: " + e.message;
+  }
+});
 </script>
 </body>
 </html>
