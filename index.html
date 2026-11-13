@@ -16,6 +16,12 @@
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px}.data-table{width:100%;border-collapse:collapse;min-width:620px;font-size:12px}.data-table th{text-align:left;color:var(--muted);font-weight:700;background:var(--panel2);padding:12px}.data-table td{padding:12px;border-top:1px solid var(--line)}.empty{text-align:center;color:var(--muted);padding:32px 12px!important}.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:12px 0}.field{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:10px;font-size:12px;min-width:180px}.notice{padding:13px 15px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6;margin:12px 0}.notice strong{color:var(--text)}.notice.warn{border-left:3px solid var(--warn)}.notice.good{border-left:3px solid var(--accent2)}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.setting-card h3{font-size:14px;margin:0 0 7px}.setting-card p{color:var(--muted);font-size:11px;line-height:1.6}.setting-card label{display:block;font-size:11px;color:var(--muted);margin:13px 0 6px}.setting-card input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:11px;border-radius:10px}.mobile-nav{display:none}.toast{position:fixed;bottom:22px;right:22px;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:12px;padding:12px 16px;font-size:12px;z-index:20;display:none}.toast.show{display:block}.small-muted{font-size:10px;color:var(--muted)}.loading{opacity:.6;pointer-events:none}
 @media(max-width:1050px){.sidebar{width:225px}.main{padding:22px 20px 90px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.sidebar{display:none}.main{padding:19px 14px 94px}.topbar{margin-bottom:18px}.topbar h1{font-size:21px}.profile>div:last-child{display:none}.top-actions .btn{padding:9px}.welcome{padding:18px;align-items:flex-start;flex-direction:column}.welcome h2{font-size:18px}.grid{gap:9px}.card{padding:13px}.metric-value{font-size:22px}.two-col,.settings-grid{grid-template-columns:1fr}.schedule{gap:7px}.slot{padding:10px}.mobile-nav{display:flex;position:fixed;z-index:10;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--line);padding:7px 4px calc(7px + env(safe-area-inset-bottom));justify-content:space-around}.mobile-nav button{border:0;background:transparent;color:var(--muted);font-size:9px;display:grid;justify-items:center;gap:4px;padding:4px 6px;min-width:48px}.mobile-nav button.active{color:var(--accent)}.mobile-nav .ico{font-size:17px}.section-head{margin-top:19px}.top-actions .iconbtn{padding:9px}.top-actions .profile{padding-left:0}}
+
+/* Admin PIN modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.78);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999}
+.modal-backdrop.show{display:flex}.admin-modal{width:min(420px,100%);background:var(--panel,#172033);border:1px solid var(--line,#334155);border-radius:16px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.admin-modal h3{margin:0 0 8px;font-size:18px}.admin-modal p{color:var(--muted);font-size:12px;line-height:1.6}.admin-modal input{width:100%;box-sizing:border-box;margin:10px 0 14px;padding:13px;border-radius:9px;border:1px solid var(--line,#334155);background:var(--bg,#0b1020);color:var(--text,#fff);font:inherit}.admin-modal .modal-actions{display:flex;gap:8px;justify-content:flex-end}.admin-modal .login-error{color:#fb7185;font-size:12px;min-height:18px;margin:0 0 8px}
+
 </style>
 </head>
 <body>
@@ -150,7 +156,7 @@
   <section class="page" id="page-published"><div class="section-head"><div><h3>Published Posts</h3><p>Facebook-এ প্রকাশিত পোস্টের ইতিহাস</p></div></div><div class="card"><div class="empty">Facebook Publishing এখনো সংযুক্ত নয়।</div></div></section>
   <section class="page" id="page-analytics"><div class="section-head"><div><h3>Analytics</h3><p>Reach, engagement, clicks ও publishing performance</p></div></div><div class="card"><div class="empty">Meta Insights API সংযুক্ত হলে Analytics এখানে দেখাবে।</div></div></section>
   <section class="page" id="page-connections"><div class="section-head"><div><h3>System Connections</h3><p>Backend endpoint ও service connection</p></div></div><div class="settings-grid">
-    <div class="card setting-card"><h3>Google Apps Script Backend</h3><p>Apps Script Web App URL এখানে দিন। এটি শুধু browser-এ সংরক্ষিত হবে; কোনো Secret Token এখানে রাখবেন না।</p><label>Web App URL</label><input id="backendUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"><div class="toolbar"><button class="btn" id="saveBackend">Save URL</button><button class="btn primary" id="testBackend">Test Connection</button></div><span class="small-muted" id="backendState">Backend URL not configured</span></div>
+    <div class="card setting-card"><h3>Google Apps Script Backend</h3><p>Apps Script Web App URL এখানে দিন। এটি শুধু browser-এ সংরক্ষিত হবে; কোনো Secret Token এখানে রাখবেন না।</p><label>Web App URL</label><input id="backendUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"><div class="toolbar"><button class="btn" id="saveBackend">Save URL</button><button class="btn" id="resetBackend">Use Default URL</button><button class="btn primary" id="testBackend">Test Connection</button></div><span class="small-muted" id="backendState">Backend URL not configured</span></div>
     <div class="card setting-card"><h3>Google Sheets & Drive</h3><p>আগে থেকেই নির্ধারিত spreadsheet এবং product Drive folders ব্যবহার হবে। Apps Script authorization প্রয়োজন।</p><div class="status-row">Spreadsheet <span class="pill warn">Pending Test</span></div><div class="status-row">Drive folders <span class="pill warn">Pending Scan</span></div></div>
     <div class="card setting-card"><h3>Facebook Page</h3><p>Meta Graph API permissions, Page ID ও token secure backend-এ configure করতে হবে। Token কখনো এই HTML-এ দেবেন না।</p><span class="pill warn">Not Connected</span></div>
     <div class="card setting-card"><h3>AI Engine</h3><p>Local Ollama / local image tooling অথবা verified free-tier connection configure করতে হবে। Unlimited cloud AI free ধরে নেওয়া যাবে না।</p><span class="pill warn">Not Configured</span></div>
@@ -162,6 +168,14 @@
 <nav class="mobile-nav" id="mobileNav">
   <button class="active" data-page="overview"><span class="ico">◫</span>Home</button><button data-page="products"><span class="ico">▣</span>Products</button><button data-page="media"><span class="ico">▧</span>Media</button><button data-page="queue"><span class="ico">☷</span>Queue</button><button data-page="connections"><span class="ico">⌘</span>Setup</button>
 </nav>
+
+<div class="modal-backdrop" id="adminLoginModal" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle">
+  <div class="admin-modal">
+    <h3 id="adminLoginTitle">Admin Login</h3>
+    <p>Tech Express AI Dashboard পরিচালনার জন্য Admin PIN দিন। PIN শুধু নিরাপদ HTTPS অনুরোধে Backend-এ যাচাই হবে।</p>
+    <form id="adminLoginForm"><input id="adminPinInput" type="password" autocomplete="current-password" placeholder="Admin PIN (কমপক্ষে ৮ অক্ষর)" required minlength="8"><div class="login-error" id="adminLoginError" aria-live="polite"></div><div class="modal-actions"><button class="btn" type="button" id="adminLoginCancel">Cancel</button><button class="btn primary" type="submit" id="adminLoginSubmit">Login</button></div></form>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <script>
 const titles={overview:"Overview",products:"Products",media:"Media Library",content:"AI Content Studio",creative:"Creative Studio",video:"Video Studio",scheduler:"Post Scheduler",queue:"Post Queue",published:"Published Posts",analytics:"Analytics",connections:"Connections",settings:"Settings",logs:"Automation Logs"};
@@ -185,6 +199,13 @@ $("saveBackend").onclick = () => {
   localStorage.setItem("tx_backend_url", backendUrl);
   $("backendState").textContent = "URL saved in this browser";
   toast("Backend URL সংরক্ষণ হয়েছে");
+};
+$("resetBackend").onclick = () => {
+  backendUrl = DEFAULT_BACKEND_URL;
+  localStorage.removeItem("tx_backend_url");
+  $("backendUrl").value = backendUrl;
+  $("backendState").textContent = "Default backend URL restored. Test connection now.";
+  toast("Default Backend URL ফিরিয়ে আনা হয়েছে");
 };
 function api(action, extraParams = {}) {
   if (!backendUrl) return Promise.reject(new Error("Connections পেজে আগে Apps Script Web App URL সংরক্ষণ করুন।"));
@@ -221,21 +242,32 @@ $("testBackend").onclick=async()=>{try{const d=await api("ping");$("backendState
 function safe(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 async 
 let adminToken = sessionStorage.getItem("txAdminSession") || "";
+function openAdminLogin(){
+  if(adminToken){toast("Admin ইতোমধ্যে Login করা আছে");return;}
+  $("adminLoginError").textContent=""; $("adminPinInput").value="";
+  $("adminLoginModal").classList.add("show");
+  setTimeout(()=>$("adminPinInput").focus(),50);
+}
+function closeAdminLogin(){$("adminLoginModal").classList.remove("show");}
+$("adminLoginCancel").onclick=closeAdminLogin;
+$("adminLoginModal").addEventListener("click",e=>{if(e.target===$("adminLoginModal"))closeAdminLogin();});
+$("adminLoginForm").addEventListener("submit",async e=>{
+  e.preventDefault(); const pin=$("adminPinInput").value; const btn=$("adminLoginSubmit");
+  btn.disabled=true; btn.textContent="Checking..."; $("adminLoginError").textContent="";
+  try{
+    const d=await api("adminLogin",{pin}); adminToken=d.token;
+    sessionStorage.setItem("txAdminSession",adminToken); $("adminLoginBtn").textContent="Admin Logged In";
+    closeAdminLogin(); toast("Admin Login সফল");
+  }catch(err){$("adminLoginError").textContent=err.message||"Login ব্যর্থ হয়েছে";}
+  finally{btn.disabled=false;btn.textContent="Login";}
+});
 async function ensureAdmin() {
-  if (adminToken) return adminToken;
-  const pin = prompt("Tech Express AI Admin PIN দিন (Apps Script Script Properties-এ TX_ADMIN_PIN সেট করা থাকতে হবে):");
-  if (!pin) throw new Error("Admin Login বাতিল হয়েছে।");
-  const d = await api("adminLogin", { pin });
-  adminToken = d.token; sessionStorage.setItem("txAdminSession", adminToken);
-  $("adminLoginBtn").textContent = "Admin Logged In";
-  toast("Admin Login সফল");
-  return adminToken;
+  if(adminToken)return adminToken; openAdminLogin(); throw new Error("Admin PIN দিন");
 }
 async function adminAction(action, data={}) {
-  const token = await ensureAdmin();
-  return api("admin", { op: action, token, ...data });
+  const token=await ensureAdmin(); return api("admin",{op:action,token,...data});
 }
-$("adminLoginBtn").onclick = async()=>{try{await ensureAdmin()}catch(e){toast(e.message)}};
+$("adminLoginBtn").onclick=openAdminLogin;
 async function loadProducts(){try{const d=await api("products");fillContentProducts(d.products);$("mProducts").textContent=d.products.filter(p=>p.active).length;$("productsBody").innerHTML=d.products.map(p=>`<tr>
 <td><strong>${safe(p.name)}</strong><br><span class="small-muted">${safe(p.id)}</span></td>
 <td>${safe(p.category)}</td><td>৳${safe(p.minPrice)} – ৳${safe(p.maxPrice)}</td><td>${safe(p.stock)}</td>
